@@ -345,6 +345,22 @@ static NSString *const MessageHanderName = @"ReactNative";
     [[self topViewController] presentViewController:alert animated:YES completion:NULL];
 }
 
+- (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential *credential))completionHandler {
+    
+    NSLog(@"Allow all");
+    
+    SecTrustRef serverTrust = challenge.protectionSpace.serverTrust;
+    
+    CFDataRef exceptions = SecTrustCopyExceptions (serverTrust);
+    
+    SecTrustSetExceptions (serverTrust, exceptions);
+    
+    CFRelease (exceptions);
+    
+    completionHandler (NSURLSessionAuthChallengeUseCredential, [NSURLCredential credentialForTrust:serverTrust]);
+    
+}
+
 /**
 * prompt
 */

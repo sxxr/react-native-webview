@@ -1,6 +1,7 @@
 package com.reactnativecommunity.webview;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import com.facebook.react.uimanager.UIManagerModule;
@@ -21,11 +22,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -34,6 +38,7 @@ import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
+import android.webkit.SslErrorHandler;
 import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -130,6 +135,32 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
     protected boolean mLastLoadFailed = false;
     protected @Nullable ReadableArray mUrlPrefixesForDefaultIntent;
+    protected Context mContext = null;
+
+    public RNCWebViewClient setContext(Context context) {
+      mContext = context;
+      return this;
+    }
+    
+    @Override
+    public void onReceivedSslError(WebView view, final SslErrorHandler handler, SslError error) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setMessage("证书不安全");
+        builder.setPositiveButton("continue", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+              handler.proceed();
+            }
+        });
+        builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                handler.cancel();
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
     @Override
     public void onPageFinished(WebView webView, String url) {
@@ -459,8 +490,8 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     settings.setAllowFileAccess(false);
     settings.setAllowContentAccess(false);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      settings.setAllowFileAccessFromFileURLs(false);
-      setAllowUniversalAccessFromFileURLs(webView, false);
+      settings.setAllowFileAccessFromFileURLs(true);
+      setAllowUniversalAccessFromFileURLs(webView, true);
     }
     setMixedContentMode(webView, "never");
 
@@ -703,7 +734,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
   @Override
   protected void addEventEmitters(ThemedReactContext reactContext, WebView view) {
     // Do not register default touch emitter and let WebView implementation handle touches
-    view.setWebViewClient(new RNCWebViewClient());
+    view.setWebViewClient(new RNCWebViewClient().setContext(view.getContext()));
   }
 
   @Override

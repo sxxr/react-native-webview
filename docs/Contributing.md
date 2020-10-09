@@ -8,6 +8,52 @@ Secondly, we'd like the contribution experience to be as good as possible. While
 
 After you fork the repo, clone it to your machine, and make your changes, you'll want to test them in an app.
 
+There are two methods of testing:
+1) Testing within a clone of react-native-webview
+2) Testing in a new `react-native init` project
+
+### Testing within react-native-webview
+
+#### For all platforms:
+```
+$ yarn install
+```
+
+#### For Android:
+```
+$ yarn start:android
+```
+
+The Android example app will built, the Metro Bundler will launch, and the example app will be installed and started in the Android emulator.
+
+#### For iOS:
+```
+$ cd example/ios
+$ pod install
+$ cd ../..
+$ yarn start:ios
+```
+
+The iOS example app will be built, the Metro bundler will launch, and the example app will be install and started in the Simulator.
+
+#### for macOS:
+```
+$ open example/macos/example.xcodeproj
+$ yarn start:macos
+```
+
+The Metro Bundler will now be running in the Terminal for react-native-macos.  In XCode select the `example-macos` target and Run.
+
+#### For Windows:
+```
+$ yarn start:windows
+$ open example/windows/WebViewWindows.sln and click run button.
+```
+
+The Metro Bundler will now be running in the Terminal for react-native-windows and the example app will be install and started
+
+### Testing in a new `react-native init` project
+
 In a new `react-native init` project, do this:
 
 ```
@@ -44,11 +90,5 @@ $ yarn add ../react-native-webview && react-native link react-native-webview
 
 ## Notes
 
-- We use Flow types. TypeScript types will probably be added at a later date.
-- We don't intend to support UIWebView and will remove it soon.
-- After pulling this repo and installing all dependencies, you can run flow on iOS and Android-specific files using the commands:
-  - `yarn test:ios:flow` for iOS
-  - `yarn test:android:flow` for Android
-- If you want to add another React Native platform to this repository, you will need to create another `.flowconfig` for it. If your platform is `example`, copy the main flowconfig and rename it to `.flowconfig.example`. Then edit the config to ignore other platforms, and add `.*/*[.]example.js` to the ignore lists of the other platforms. Then add an entry to `package.json` like this:
-  - `"test:example:flow": "flow check --flowconfig-name .flowconfig.example"`
-- Currently you need to install React Native 0.57 to be able to test these types - `flow check` will not pass against 0.56.
+- We use TypeScript.
+- After pulling this repo and installing all dependencies, you can run tests using the command: `yarn ci`
